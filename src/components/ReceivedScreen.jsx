@@ -2,7 +2,7 @@ import LetterAudio from './LetterAudio'
 
 // 送出後的畫面：先是漂流中，接著像「拆開一封不知從哪來的信」般展開陌生人的回應。
 // status: 'sending' | 'done'
-export default function ReceivedScreen({ status, word, received, error, onDone }) {
+export default function ReceivedScreen({ status, word, received, error, onDone, onRetry }) {
   if (status === 'sending') {
     return (
       <div className="fixed inset-0 z-50 bg-paper flex flex-col items-center justify-center px-10">
@@ -40,9 +40,29 @@ export default function ReceivedScreen({ status, word, received, error, onDone }
     <div className="fixed inset-0 z-50 bg-paper flex flex-col overflow-y-auto">
       <div className="flex-1 flex flex-col items-center justify-center px-8 py-16 min-h-full w-full">
         {error ? (
-          <p className="text-sm text-drift font-light text-center max-w-xs leading-relaxed">
-            {error}
-          </p>
+          <div className="max-w-xs text-center">
+            <p
+              className="text-[0.7rem] tracking-[0.35em] text-ink-muted mb-7"
+              style={rise(0.05)}
+            >
+              海面靜止
+            </p>
+            <p
+              className="text-lg font-serif font-light text-ink leading-loose mb-10"
+              style={rise(0.2)}
+            >
+              {error}
+            </p>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="text-sm font-serif font-light text-ink tracking-wide underline underline-offset-4 decoration-ink/30 active:opacity-60 transition-opacity"
+                style={rise(0.35)}
+              >
+                再讓它漂一次
+              </button>
+            )}
+          </div>
         ) : received ? (
           <div className="w-full max-w-sm">
             {/* 信從何處來 */}
@@ -118,31 +138,33 @@ export default function ReceivedScreen({ status, word, received, error, onDone }
               你的話已經漂出去了。
               <br />
               <span className="text-ink-muted text-base">
-                此刻還沒有人在「{word}」下停留——
+                此刻還沒有回音——
                 <br />
-                你的，會是第一封，
+                你的，也許是「{word}」的第一封，
                 <br />
-                靜靜等著被誰拆開。
+                又或者，那封信正漂在來的路上。
               </span>
             </p>
           </div>
         )}
       </div>
 
-      {/* 收束：今天的交換到此，沒有任何後續入口 */}
+      {/* 收束：今天的交換到此，沒有任何後續入口（錯誤時不顯示收束句）*/}
       <footer className="pb-14 px-6 flex flex-col items-center shrink-0">
-        <p
-          className="text-sm text-ink-light font-serif font-light tracking-[0.15em] mb-6"
-          style={rise(0.95)}
-        >
-          今天的交換，到這裡了。
-        </p>
+        {!error && (
+          <p
+            className="text-sm text-ink-light font-serif font-light tracking-[0.15em] mb-6"
+            style={rise(0.95)}
+          >
+            今天的交換，到這裡了。
+          </p>
+        )}
         <button
           onClick={onDone}
           className="text-xs text-ink-muted font-light tracking-widest active:opacity-60 transition-opacity"
-          style={rise(1.05)}
+          style={rise(error ? 0.5 : 1.05)}
         >
-          輕輕闔上
+          {error ? '先離開' : '輕輕闔上'}
         </button>
       </footer>
 

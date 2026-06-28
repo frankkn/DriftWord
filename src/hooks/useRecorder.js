@@ -104,8 +104,8 @@ export function useRecorder() {
       console.error(err)
       setError(
         err?.name === 'NotAllowedError'
-          ? '需要麥克風權限才能錄音。'
-          : '無法存取麥克風，請確認裝置與權限。',
+          ? '還沒能聽見你。讓 DriftWord 借用麥克風，或改用文字也好。'
+          : '這個裝置暫時收不到你的聲音。也許，用寫的說也是一種方式。',
       )
       stopStream()
       setIsRecording(false)

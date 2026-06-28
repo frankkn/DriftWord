@@ -92,6 +92,33 @@ async function claimStrangerDrift(wordId) {
   return hydrateDrift(drift)
 }
 
+// 查詢「今天」的狀態：使用者是否已對今日詞回應過、以及是否已收到一封回音。
+// 回傳 { responded, received }，received 為已 hydrate 的陌生人回應（可能 null）。
+export async function getTodayStatus(wordId) {
+  if (!wordId) return { responded: false, received: null }
+  const userId = await uid()
+
+  const [mine, claimed] = await Promise.all([
+    supabase
+      .from('drifts')
+      .select('id')
+      .eq('word_id', wordId)
+      .eq('author_id', userId)
+      .limit(1),
+    supabase
+      .from('drifts')
+      .select('*')
+      .eq('word_id', wordId)
+      .eq('claimed_by', userId)
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  const responded = (mine.data?.length ?? 0) > 0
+  const received = claimed.data ? await hydrateDrift(claimed.data) : null
+  return { responded, received }
+}
+
 // 把一則 drift 補上可播放的內容（語音段 + signed URL）。
 export async function hydrateDrift(drift) {
   if (!drift) return null

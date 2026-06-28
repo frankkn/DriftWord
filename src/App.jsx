@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Settings } from './components/icons'
 import RecordingScreen from './components/RecordingScreen'
 import TextScreen from './components/TextScreen'
 import ReceivedScreen from './components/ReceivedScreen'
 import SettingsScreen from './components/SettingsScreen'
+import TodayClosed from './components/TodayClosed'
 import { ensureSession } from './lib/session'
 import { getTodayWord } from './lib/words'
-import { submitVoiceDrift, submitTextDrift } from './lib/drift'
+import { submitVoiceDrift, submitTextDrift, getTodayStatus } from './lib/drift'
+import { toPoeticError } from './lib/messages'
 
 const FALLBACK_WORD = '消失'
 
@@ -20,10 +22,15 @@ export default function App() {
   const [word, setWord] = useState(null) // { id, text } | null
   const [loading, setLoading] = useState(true)
 
+  // 今天的狀態
+  const [responded, setResponded] = useState(false)
+  const [todayReceived, setTodayReceived] = useState(null)
+
   // 送出 / 收件狀態
   const [sendStatus, setSendStatus] = useState('sending') // 'sending' | 'done'
   const [received, setReceived] = useState(null)
   const [sendError, setSendError] = useState(null)
+  const lastSubmit = useRef(null)
 
   useEffect(() => {
     let alive = true
@@ -33,6 +40,12 @@ export default function App() {
       if (!alive) return
       setWord(w)
       setLoading(false)
+      if (w?.id) {
+        const status = await getTodayStatus(w.id)
+        if (!alive) return
+        setResponded(status.responded)
+        setTodayReceived(status.received)
+      }
     })()
     return () => {
       alive = false
@@ -43,6 +56,7 @@ export default function App() {
 
   // 共用送出流程：進入結果畫面 → 顯示漂流中 → 執行送出 → 呈現收到的回應
   const runSubmit = async (submitFn) => {
+    lastSubmit.current = submitFn
     setReceived(null)
     setSendError(null)
     setSendStatus('sending')
@@ -51,9 +65,12 @@ export default function App() {
     try {
       const { received } = await submitFn()
       setReceived(received)
+      // 更新今天的狀態，回首頁時會反映「已說過」
+      setResponded(true)
+      setTodayReceived(received)
     } catch (err) {
       console.error(err)
-      setSendError(err?.message || '送出時發生問題，請稍後再試。')
+      setSendError(toPoeticError(err))
     } finally {
       setSendStatus('done')
     }
@@ -64,6 +81,18 @@ export default function App() {
 
   const handleSubmitText = (text) =>
     runSubmit(() => submitTextDrift(word?.id, text))
+
+  const handleRetry = () => {
+    if (lastSubmit.current) runSubmit(lastSubmit.current)
+  }
+
+  // 重讀今天收到的那封信
+  const openReread = () => {
+    setReceived(todayReceived)
+    setSendError(null)
+    setSendStatus('done')
+    setView('result')
+  }
 
   return (
     <div className="min-h-screen bg-paper flex flex-col">
@@ -96,28 +125,34 @@ export default function App() {
           {wordText}
         </h1>
 
-        <p className="text-sm text-ink-muted font-serif font-light text-center leading-relaxed max-w-[18rem]">
-          說出你的第一個記憶，或一個感受。
-        </p>
+        {!loading && responded ? (
+          <TodayClosed received={todayReceived} onReread={openReread} />
+        ) : (
+          <p className="text-sm text-ink-muted font-serif font-light text-center leading-relaxed max-w-[18rem]">
+            說出你的第一個記憶，或一個感受。
+          </p>
+        )}
       </main>
 
-      {/* Bottom actions */}
-      <footer className="pb-12 px-6 flex flex-col gap-3 max-w-sm mx-auto w-full">
-        <button
-          onClick={() => setView('recording')}
-          className="w-full py-4 rounded-2xl bg-ink text-paper font-serif font-light text-base tracking-wide flex items-center justify-center gap-3 active:opacity-80 transition-opacity"
-        >
-          <span className="text-xl leading-none">🎙</span>
-          <span>開始錄音</span>
-        </button>
-        <button
-          onClick={() => setView('text')}
-          className="w-full py-4 rounded-2xl border border-ink/20 text-ink-light font-serif font-light text-base tracking-wide flex items-center justify-center gap-3 active:opacity-60 transition-opacity"
-        >
-          <span className="text-xl leading-none">✍️</span>
-          <span>用文字回應</span>
-        </button>
-      </footer>
+      {/* Bottom actions — 只有還沒回應時顯示 */}
+      {!responded && (
+        <footer className="pb-12 px-6 flex flex-col gap-3 max-w-sm mx-auto w-full">
+          <button
+            onClick={() => setView('recording')}
+            className="w-full py-4 rounded-2xl bg-ink text-paper font-serif font-light text-base tracking-wide flex items-center justify-center gap-3 active:opacity-80 transition-opacity"
+          >
+            <span className="text-xl leading-none">🎙</span>
+            <span>開始錄音</span>
+          </button>
+          <button
+            onClick={() => setView('text')}
+            className="w-full py-4 rounded-2xl border border-ink/20 text-ink-light font-serif font-light text-base tracking-wide flex items-center justify-center gap-3 active:opacity-60 transition-opacity"
+          >
+            <span className="text-xl leading-none">✍️</span>
+            <span>用文字回應</span>
+          </button>
+        </footer>
+      )}
 
       {view === 'recording' && (
         <RecordingScreen
@@ -141,6 +176,7 @@ export default function App() {
           word={wordText}
           received={received}
           error={sendError}
+          onRetry={handleRetry}
           onDone={() => setView('home')}
         />
       )}
