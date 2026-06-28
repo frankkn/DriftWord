@@ -99,9 +99,11 @@ async function claimStrangerDrift(wordId) {
 }
 
 // 查詢「今天」的狀態：使用者是否已對今日詞回應過、以及是否已收到一封回音。
-// 回傳 { responded, received }，received 為已 hydrate 的陌生人回應（可能 null）。
+// 延遲投遞（方案 1）：若已回應但還沒收到回音，回訪時再撈一次池子——
+// 第一個留言的人，會在稍後（有人也留言後）回來時收到漂來的信。
+// 回傳 { responded, received, justArrived }，justArrived 表示這封信是本次才剛漂到。
 export async function getTodayStatus(wordId) {
-  if (!wordId) return { responded: false, received: null }
+  if (!wordId) return { responded: false, received: null, justArrived: false }
   const userId = await uid()
 
   const [mine, claimed] = await Promise.all([
@@ -121,8 +123,15 @@ export async function getTodayStatus(wordId) {
   ])
 
   const responded = (mine.data?.length ?? 0) > 0
-  const received = claimed.data ? await hydrateDrift(claimed.data) : null
-  return { responded, received }
+  let received = claimed.data ? await hydrateDrift(claimed.data) : null
+  let justArrived = false
+
+  if (responded && !received) {
+    received = await claimStrangerDrift(wordId)
+    justArrived = !!received
+  }
+
+  return { responded, received, justArrived }
 }
 
 // 把一則 drift 補上可播放的內容（語音段 + signed URL）。

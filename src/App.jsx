@@ -25,6 +25,7 @@ export default function App() {
   // 今天的狀態
   const [responded, setResponded] = useState(false)
   const [todayReceived, setTodayReceived] = useState(null)
+  const [justArrived, setJustArrived] = useState(false)
 
   // 送出 / 收件狀態
   const [sendStatus, setSendStatus] = useState('sending') // 'sending' | 'done'
@@ -45,6 +46,7 @@ export default function App() {
         if (!alive) return
         setResponded(status.responded)
         setTodayReceived(status.received)
+        setJustArrived(status.justArrived)
       }
     })()
     return () => {
@@ -68,6 +70,7 @@ export default function App() {
       // 更新今天的狀態，回首頁時會反映「已說過」
       setResponded(true)
       setTodayReceived(received)
+      setJustArrived(false) // 當場交換得到的，不算「稍後漂到」
     } catch (err) {
       console.error(err)
       setSendError(toPoeticError(err))
@@ -126,7 +129,11 @@ export default function App() {
         </h1>
 
         {!loading && responded ? (
-          <TodayClosed received={todayReceived} onReread={openReread} />
+          <TodayClosed
+            received={todayReceived}
+            justArrived={justArrived}
+            onReread={openReread}
+          />
         ) : (
           <p className="text-sm text-ink-muted font-serif font-light text-center leading-relaxed max-w-[18rem]">
             說出你的第一個記憶，或一個感受。
