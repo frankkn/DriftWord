@@ -15,6 +15,7 @@ export default {
       },
       fontFamily: {
         serif: ['"Noto Serif TC"', '"Georgia"', 'serif'],
+        hand: ['"Long Cang"', '"Noto Serif TC"', 'cursive'],
       },
     },
   },
