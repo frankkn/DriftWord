@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Settings } from './components/icons'
 import RecordingScreen from './components/RecordingScreen'
+import ReceivedScreen from './components/ReceivedScreen'
 import { ensureSession } from './lib/session'
 import { getTodayWord } from './lib/words'
+import { submitVoiceDrift } from './lib/drift'
 
 const FALLBACK_WORD = '消失'
 
@@ -12,9 +14,14 @@ function formatToday() {
 }
 
 export default function App() {
-  const [view, setView] = useState('home') // 'home' | 'recording'
+  const [view, setView] = useState('home') // 'home' | 'recording' | 'result'
   const [word, setWord] = useState(null) // { id, text } | null
   const [loading, setLoading] = useState(true)
+
+  // 送出 / 收件狀態
+  const [sendStatus, setSendStatus] = useState('sending') // 'sending' | 'done'
+  const [received, setReceived] = useState(null)
+  const [sendError, setSendError] = useState(null)
 
   useEffect(() => {
     let alive = true
@@ -32,10 +39,22 @@ export default function App() {
 
   const wordText = word?.text ?? FALLBACK_WORD
 
-  const handleSubmit = (segments) => {
-    // TODO: 上傳 segments 到 Supabase Storage，建立 drift + 認領一則回應
-    console.log('準備漂流的語音段：', { wordId: word?.id, segments })
-    setView('home')
+  const handleSubmit = async (segments) => {
+    // 進入結果畫面並顯示「漂流中」
+    setReceived(null)
+    setSendError(null)
+    setSendStatus('sending')
+    setView('result')
+
+    try {
+      const { received } = await submitVoiceDrift(word?.id, segments)
+      setReceived(received)
+    } catch (err) {
+      console.error(err)
+      setSendError(err?.message || '送出時發生問題，請稍後再試。')
+    } finally {
+      setSendStatus('done')
+    }
   }
 
   return (
@@ -95,6 +114,16 @@ export default function App() {
           word={wordText}
           onClose={() => setView('home')}
           onSubmit={handleSubmit}
+        />
+      )}
+
+      {view === 'result' && (
+        <ReceivedScreen
+          status={sendStatus}
+          word={wordText}
+          received={received}
+          error={sendError}
+          onDone={() => setView('home')}
         />
       )}
     </div>
