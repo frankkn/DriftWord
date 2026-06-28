@@ -31,6 +31,7 @@ export default function App() {
   const [sendStatus, setSendStatus] = useState('sending') // 'sending' | 'done'
   const [received, setReceived] = useState(null)
   const [sendError, setSendError] = useState(null)
+  const [rejected, setRejected] = useState(false) // 內容被黑名單擋下
   const lastSubmit = useRef(null)
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function App() {
     lastSubmit.current = submitFn
     setReceived(null)
     setSendError(null)
+    setRejected(false)
     setSendStatus('sending')
     setView('result')
 
@@ -73,6 +75,7 @@ export default function App() {
       setJustArrived(false) // 當場交換得到的，不算「稍後漂到」
     } catch (err) {
       console.error(err)
+      if (err?.message === 'REJECTED') setRejected(true)
       setSendError(toPoeticError(err))
     } finally {
       setSendStatus('done')
@@ -183,7 +186,9 @@ export default function App() {
           word={wordText}
           received={received}
           error={sendError}
+          rejected={rejected}
           onRetry={handleRetry}
+          onRewrite={() => setView('text')}
           onDone={() => setView('home')}
         />
       )}

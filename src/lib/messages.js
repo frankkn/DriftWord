@@ -7,6 +7,11 @@ export function toPoeticError(err) {
   if (raw === 'duplicate') {
     return '今天，你已經為「這個詞」說過話了。一天，只交換一次。'
   }
+
+  // 內容含不適合漂給陌生人的字眼（黑名單擋下）
+  if (raw === 'rejected') {
+    return '這段話，DriftWord 沒能讓它漂出去。\n也許換一種說法，它就能抵達某個人。'
+  }
   const networkish =
     offline ||
     raw.includes('fetch') ||

@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { ensureSession } from './session'
+import { findBlockedWord } from './blocklist'
 
 const BUCKET = 'drifts'
 
@@ -70,6 +71,9 @@ export async function submitTextDrift(wordId, text) {
   if (!wordId) throw new Error('缺少今日詞，無法送出。')
   const content = (text ?? '').trim()
   if (!content) throw new Error('沒有可送出的文字。')
+
+  // 黑名單檢查：命中就在送出前擋下，不寫入資料庫
+  if (findBlockedWord(content)) throw new Error('REJECTED')
 
   const userId = await uid()
   const { data: drift, error } = await supabase

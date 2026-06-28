@@ -2,7 +2,7 @@ import LetterAudio from './LetterAudio'
 
 // 送出後的畫面：先是漂流中，接著像「拆開一封不知從哪來的信」般展開陌生人的回應。
 // status: 'sending' | 'done'
-export default function ReceivedScreen({ status, word, received, error, onDone, onRetry }) {
+export default function ReceivedScreen({ status, word, received, error, rejected, onDone, onRetry, onRewrite }) {
   if (status === 'sending') {
     return (
       <div className="fixed inset-0 z-50 bg-paper flex flex-col items-center justify-center px-10">
@@ -45,22 +45,32 @@ export default function ReceivedScreen({ status, word, received, error, onDone, 
               className="text-[0.7rem] tracking-[0.35em] text-ink-muted mb-7"
               style={rise(0.05)}
             >
-              海面靜止
+              {rejected ? '未能成行' : '海面靜止'}
             </p>
             <p
-              className="text-lg font-serif font-light text-ink leading-loose mb-10"
+              className="text-lg font-serif font-light text-ink leading-loose mb-10 whitespace-pre-line"
               style={rise(0.2)}
             >
               {error}
             </p>
-            {onRetry && (
+            {rejected ? (
               <button
-                onClick={onRetry}
+                onClick={onRewrite}
                 className="text-sm font-serif font-light text-ink tracking-wide underline underline-offset-4 decoration-ink/30 active:opacity-60 transition-opacity"
                 style={rise(0.35)}
               >
-                再讓它漂一次
+                換個說法
               </button>
+            ) : (
+              onRetry && (
+                <button
+                  onClick={onRetry}
+                  className="text-sm font-serif font-light text-ink tracking-wide underline underline-offset-4 decoration-ink/30 active:opacity-60 transition-opacity"
+                  style={rise(0.35)}
+                >
+                  再讓它漂一次
+                </button>
+              )
             )}
           </div>
         ) : received ? (
