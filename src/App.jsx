@@ -3,6 +3,7 @@ import { Settings } from './components/icons'
 import RecordingScreen from './components/RecordingScreen'
 import TextScreen from './components/TextScreen'
 import ReceivedScreen from './components/ReceivedScreen'
+import SettingsScreen from './components/SettingsScreen'
 import { ensureSession } from './lib/session'
 import { getTodayWord } from './lib/words'
 import { submitVoiceDrift, submitTextDrift } from './lib/drift'
@@ -15,7 +16,7 @@ function formatToday() {
 }
 
 export default function App() {
-  const [view, setView] = useState('home') // 'home' | 'recording' | 'text' | 'result'
+  const [view, setView] = useState('home') // 'home' | 'recording' | 'text' | 'result' | 'settings'
   const [word, setWord] = useState(null) // { id, text } | null
   const [loading, setLoading] = useState(true)
 
@@ -72,6 +73,7 @@ export default function App() {
           DriftWord
         </span>
         <button
+          onClick={() => setView('settings')}
           aria-label="設定"
           className="w-9 h-9 flex items-center justify-center rounded-full text-ink-muted hover:text-ink-light transition-colors"
         >
@@ -142,6 +144,8 @@ export default function App() {
           onDone={() => setView('home')}
         />
       )}
+
+      {view === 'settings' && <SettingsScreen onClose={() => setView('home')} />}
     </div>
   )
 }

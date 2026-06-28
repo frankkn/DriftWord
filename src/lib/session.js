@@ -18,3 +18,10 @@ export function ensureSession() {
   }
   return sessionPromise
 }
+
+// 重新開始：登出目前匿名身分，下一次會建立全新的身分（過去的漂流不再屬於你）。
+export async function resetSession() {
+  await supabase.auth.signOut()
+  sessionPromise = null
+  return ensureSession()
+}
