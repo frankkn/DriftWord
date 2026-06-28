@@ -30,7 +30,10 @@ export async function submitVoiceDrift(wordId, segments) {
     .insert({ word_id: wordId, author_id: userId, kind: 'voice' })
     .select()
     .single()
-  if (dErr) throw new Error(`建立回應失敗：${dErr.message}`)
+  if (dErr) {
+    if (dErr.code === '23505') throw new Error('DUPLICATE')
+    throw new Error(`建立回應失敗：${dErr.message}`)
+  }
 
   // 2. 逐段上傳到 storage：{uid}/{driftId}/{idx}.{ext}
   const segmentRows = []
@@ -74,7 +77,10 @@ export async function submitTextDrift(wordId, text) {
     .insert({ word_id: wordId, author_id: userId, kind: 'text', text_content: content })
     .select()
     .single()
-  if (error) throw new Error(`建立回應失敗：${error.message}`)
+  if (error) {
+    if (error.code === '23505') throw new Error('DUPLICATE')
+    throw new Error(`建立回應失敗：${error.message}`)
+  }
 
   const received = await claimStrangerDrift(wordId)
   return { drift, received }

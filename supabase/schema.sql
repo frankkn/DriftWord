@@ -31,6 +31,10 @@ create index if not exists drifts_word_idx on public.drifts(word_id);
 create index if not exists drifts_unclaimed_idx
   on public.drifts(word_id) where claimed_by is null;
 
+-- 一個人對同一個詞只能回應一次（鎖死「一天一次」，繞過 UI 也擋得住）
+create unique index if not exists drifts_one_per_author_word
+  on public.drifts(author_id, word_id);
+
 -- ── 語音分段（最多 3 段）─────────────────────────────────
 create table if not exists public.drift_segments (
   id          uuid primary key default gen_random_uuid(),

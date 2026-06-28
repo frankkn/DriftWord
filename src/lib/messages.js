@@ -2,6 +2,11 @@
 export function toPoeticError(err) {
   const offline = typeof navigator !== 'undefined' && navigator.onLine === false
   const raw = (err?.message || '').toLowerCase()
+
+  // 今天已經對這個詞說過話了（資料庫唯一約束擋下）
+  if (raw === 'duplicate') {
+    return '今天，你已經為「這個詞」說過話了。一天，只交換一次。'
+  }
   const networkish =
     offline ||
     raw.includes('fetch') ||
