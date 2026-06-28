@@ -14,7 +14,7 @@
 
 ### 🌊 點此進入 DriftWord
 
-# **https://driftword.vercel.app**
+# **https://drift-word.vercel.app**
 
 *打開網頁 → 看見今天的詞 → 用語音或文字說出你的感受 → 收到一封陌生人的信。*
 
@@ -23,9 +23,6 @@
 </td>
 </tr>
 </table>
-
-> ⚠️ **尚未部署**：上面的網址是佔位符。部署到 Vercel 後，把它換成正式網址即可。
-> 在那之前，可依下方「本地開發」啟動，於 `http://localhost:5173` 體驗。
 
 ---
 
