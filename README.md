@@ -8,21 +8,10 @@
 
 ## ▶ 開始使用
 
-<table>
-<tr>
-<td>
+### 🌊 [https://drift-word.vercel.app](https://drift-word.vercel.app)
 
-### 🌊 點此進入 DriftWord
-
-# **https://drift-word.vercel.app**
-
-*打開網頁 → 看見今天的詞 → 用語音或文字說出你的感受 → 收到一封陌生人的信。*
-
-*不需要註冊，不需要帳號。*
-
-</td>
-</tr>
-</table>
+打開網頁 → 看見今天的詞 → 用語音或文字說出你的感受 → 收到一封陌生人的信。
+不需要註冊，不需要帳號。
 
 ---
 
