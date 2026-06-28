@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Settings } from './components/icons'
 import RecordingScreen from './components/RecordingScreen'
+import TextScreen from './components/TextScreen'
 import ReceivedScreen from './components/ReceivedScreen'
 import { ensureSession } from './lib/session'
 import { getTodayWord } from './lib/words'
-import { submitVoiceDrift } from './lib/drift'
+import { submitVoiceDrift, submitTextDrift } from './lib/drift'
 
 const FALLBACK_WORD = '消失'
 
@@ -14,7 +15,7 @@ function formatToday() {
 }
 
 export default function App() {
-  const [view, setView] = useState('home') // 'home' | 'recording' | 'result'
+  const [view, setView] = useState('home') // 'home' | 'recording' | 'text' | 'result'
   const [word, setWord] = useState(null) // { id, text } | null
   const [loading, setLoading] = useState(true)
 
@@ -39,15 +40,15 @@ export default function App() {
 
   const wordText = word?.text ?? FALLBACK_WORD
 
-  const handleSubmit = async (segments) => {
-    // 進入結果畫面並顯示「漂流中」
+  // 共用送出流程：進入結果畫面 → 顯示漂流中 → 執行送出 → 呈現收到的回應
+  const runSubmit = async (submitFn) => {
     setReceived(null)
     setSendError(null)
     setSendStatus('sending')
     setView('result')
 
     try {
-      const { received } = await submitVoiceDrift(word?.id, segments)
+      const { received } = await submitFn()
       setReceived(received)
     } catch (err) {
       console.error(err)
@@ -56,6 +57,12 @@ export default function App() {
       setSendStatus('done')
     }
   }
+
+  const handleSubmitVoice = (segments) =>
+    runSubmit(() => submitVoiceDrift(word?.id, segments))
+
+  const handleSubmitText = (text) =>
+    runSubmit(() => submitTextDrift(word?.id, text))
 
   return (
     <div className="min-h-screen bg-paper flex flex-col">
@@ -102,6 +109,7 @@ export default function App() {
           <span>開始錄音</span>
         </button>
         <button
+          onClick={() => setView('text')}
           className="w-full py-4 rounded-2xl border border-ink/20 text-ink-light font-serif font-light text-base tracking-wide flex items-center justify-center gap-3 active:opacity-60 transition-opacity"
         >
           <span className="text-xl leading-none">✍️</span>
@@ -113,7 +121,15 @@ export default function App() {
         <RecordingScreen
           word={wordText}
           onClose={() => setView('home')}
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmitVoice}
+        />
+      )}
+
+      {view === 'text' && (
+        <TextScreen
+          word={wordText}
+          onClose={() => setView('home')}
+          onSubmit={handleSubmitText}
         />
       )}
 

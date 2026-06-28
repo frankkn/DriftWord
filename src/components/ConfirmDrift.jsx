@@ -1,5 +1,11 @@
 // 送出前的確認層。刻意做成全螢幕、安靜、需要停頓一下的儀式感。
-export default function ConfirmDrift({ count, onConfirm, onCancel }) {
+// mode: 'voice'（搭配 count 段數）| 'text'
+export default function ConfirmDrift({ mode = 'voice', count = 0, onConfirm, onCancel }) {
+  const detail =
+    mode === 'text'
+      ? '你寫下的話，會交給一個你永遠不會認識的人。'
+      : `${count} 段語音，會交給一個你永遠不會認識的人。`
+
   return (
     <div className="fixed inset-0 z-50 bg-paper flex flex-col items-center justify-center px-10 animate-[fadeIn_0.4s_ease]">
       <p className="text-xs tracking-[0.3em] text-ink-muted uppercase mb-12">
@@ -11,7 +17,7 @@ export default function ConfirmDrift({ count, onConfirm, onCancel }) {
       </p>
 
       <p className="text-sm text-ink-muted font-light text-center mb-16">
-        {count} 段語音，會交給一個你永遠不會認識的人。
+        {detail}
       </p>
 
       <button
