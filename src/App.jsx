@@ -7,7 +7,7 @@ import SettingsScreen from './components/SettingsScreen'
 import TodayClosed from './components/TodayClosed'
 import { ensureSession } from './lib/session'
 import { getTodayWord } from './lib/words'
-import { submitVoiceDrift, submitTextDrift, getTodayStatus } from './lib/drift'
+import { submitVoiceDrift, submitTextDrift, getTodayStatus, claimStrangerDrift } from './lib/drift'
 import { toPoeticError } from './lib/messages'
 
 const FALLBACK_WORD = '消失'
@@ -54,6 +54,19 @@ export default function App() {
       alive = false
     }
   }, [])
+
+  // 每 30 秒輪詢一次，等待配對漂入
+  useEffect(() => {
+    if (!responded || todayReceived || !word?.id) return
+    const id = setInterval(async () => {
+      const found = await claimStrangerDrift(word.id)
+      if (!found) return
+      setTodayReceived(found)
+      setReceived(found)
+      setJustArrived(true)
+    }, 30_000)
+    return () => clearInterval(id)
+  }, [responded, todayReceived, word?.id])
 
   const wordText = word?.text ?? FALLBACK_WORD
 

@@ -91,7 +91,7 @@ export async function submitTextDrift(wordId, text) {
 }
 
 // 呼叫 RPC 認領一則同詞、別人寫的、未被認領的回應。沒有則回傳 null。
-async function claimStrangerDrift(wordId) {
+export async function claimStrangerDrift(wordId) {
   const { data, error } = await supabase.rpc('claim_drift', { p_word_id: wordId })
   if (error) {
     console.error('[DriftWord] 認領回應失敗：', error.message)

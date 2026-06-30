@@ -148,11 +148,14 @@ export default function ReceivedScreen({ status, word, received, error, rejected
               你的話已經漂出去了。
               <br />
               <span className="text-ink-muted text-base">
-                此刻還沒有回音——
+                你，也許是今天第一個
                 <br />
-                你的，也許是「{word}」的第一封，
+                說出「{word}」的人。
                 <br />
-                又或者，那封信正漂在來的路上。
+                <br />
+                這裡會靜靜等著——
+                <br />
+                有信漂來，會自動出現。
               </span>
             </p>
           </div>
@@ -161,7 +164,7 @@ export default function ReceivedScreen({ status, word, received, error, rejected
 
       {/* 收束：今天的交換到此，沒有任何後續入口（錯誤時不顯示收束句）*/}
       <footer className="pb-14 px-6 flex flex-col items-center shrink-0">
-        {!error && (
+        {!error && received && (
           <p
             className="text-sm text-ink-light font-serif font-light tracking-[0.15em] mb-6"
             style={rise(0.95)}
@@ -172,9 +175,9 @@ export default function ReceivedScreen({ status, word, received, error, rejected
         <button
           onClick={onDone}
           className="text-xs text-ink-muted font-light tracking-widest active:opacity-60 transition-opacity"
-          style={rise(error ? 0.5 : 1.05)}
+          style={rise(error || !received ? 0.5 : 1.05)}
         >
-          {error ? '先離開' : '輕輕闔上'}
+          {received ? '輕輕闔上' : '先離開'}
         </button>
       </footer>
 
