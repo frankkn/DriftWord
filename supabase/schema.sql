@@ -110,7 +110,13 @@ begin
    )
   returning * into result;
 
-  return result; -- 沒有可認領的回應時回傳 null
+  -- 沒有可認領的回應時，result 會是一個欄位全為 null 的 row；
+  -- 必須明確回傳 SQL NULL，否則前端會收到 {id:null,...} 這種假物件。
+  if not found then
+    return null;
+  end if;
+
+  return result;
 end;
 $$;
 

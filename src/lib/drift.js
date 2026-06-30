@@ -105,7 +105,9 @@ export async function claimStrangerDrift(wordId) {
     return null
   }
   const drift = Array.isArray(data) ? data[0] ?? null : data
-  if (!drift) return null
+  // claim_drift 在沒有可認領的信時，PostgREST 會回傳一個欄位全為 null 的 row
+  // （而非真正的 null），用 id 是否存在判斷才可靠。
+  if (!drift?.id) return null
   return hydrateDrift(drift)
 }
 
@@ -134,6 +136,8 @@ export async function getTodayStatus(wordId) {
   ])
 
   if (mine.error) throw new Error(`查詢回應狀態失敗：${mine.error.message}`)
+  // claimed 查詢失敗時不可當作「還沒收到」——否則會誤判而重複認領第二封
+  if (claimed.error) throw new Error(`查詢回音狀態失敗：${claimed.error.message}`)
   const responded = (mine.data?.length ?? 0) > 0
   let received = claimed.data ? await hydrateDrift(claimed.data) : null
   let justArrived = false
