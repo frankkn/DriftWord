@@ -43,11 +43,16 @@ export default function App() {
       setWord(w)
       setLoading(false)
       if (w?.id) {
-        const status = await getTodayStatus(w.id)
-        if (!alive) return
-        setResponded(status.responded)
-        setTodayReceived(status.received)
-        setJustArrived(status.justArrived)
+        try {
+          const status = await getTodayStatus(w.id)
+          if (!alive) return
+          setResponded(status.responded)
+          setTodayReceived(status.received)
+          setJustArrived(status.justArrived)
+        } catch (e) {
+          console.error('[DriftWord] 無法取得今日狀態：', e.message)
+          // 查詢失敗保持預設值；若使用者已送出，DB constraint 仍會擋下重複送出
+        }
       }
     })()
     return () => {
@@ -58,8 +63,12 @@ export default function App() {
   // 每 30 秒輪詢一次，等待配對漂入
   useEffect(() => {
     if (!responded || todayReceived || !word?.id) return
+    let busy = false
     const id = setInterval(async () => {
+      if (document.hidden || busy) return
+      busy = true
       const found = await claimStrangerDrift(word.id)
+      busy = false
       if (!found) return
       setTodayReceived(found)
       setReceived(found)
@@ -89,7 +98,8 @@ export default function App() {
     } catch (err) {
       console.error(err)
       if (err?.message === 'REJECTED') setRejected(true)
-      setSendError(toPoeticError(err))
+      if (err?.message === 'DUPLICATE') setResponded(true)
+      setSendError(toPoeticError(err, wordText))
     } finally {
       setSendStatus('done')
     }

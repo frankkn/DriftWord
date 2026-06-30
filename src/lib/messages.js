@@ -1,11 +1,12 @@
 // 把技術性的錯誤轉成符合 DriftWord 語氣的提示。
-export function toPoeticError(err) {
+export function toPoeticError(err, word) {
   const offline = typeof navigator !== 'undefined' && navigator.onLine === false
   const raw = (err?.message || '').toLowerCase()
 
   // 今天已經對這個詞說過話了（資料庫唯一約束擋下）
   if (raw === 'duplicate') {
-    return '今天，你已經為「這個詞」說過話了。一天，只交換一次。'
+    const w = word ? `「${word}」` : '這個詞'
+    return `今天，你已經為${w}說過話了。一天，只交換一次。`
   }
 
   // 內容含不適合漂給陌生人的字眼（黑名單擋下）

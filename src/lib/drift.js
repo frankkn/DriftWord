@@ -37,6 +37,7 @@ export async function submitVoiceDrift(wordId, segments) {
   }
 
   // 2. 逐段上傳到 storage：{uid}/{driftId}/{idx}.{ext}
+  // 任一段失敗時刪除 drift row（rollback），讓重試可以從頭開始。
   const segmentRows = []
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i]
@@ -47,7 +48,10 @@ export async function submitVoiceDrift(wordId, segments) {
         contentType: seg.mimeType || 'audio/webm',
         upsert: false,
       })
-    if (upErr) throw new Error(`上傳第 ${i + 1} 段失敗：${upErr.message}`)
+    if (upErr) {
+      await supabase.from('drifts').delete().eq('id', drift.id)
+      throw new Error(`上傳第 ${i + 1} 段失敗：${upErr.message}`)
+    }
     segmentRows.push({
       drift_id: drift.id,
       path,
@@ -58,7 +62,10 @@ export async function submitVoiceDrift(wordId, segments) {
 
   // 3. 寫入 segment 紀錄
   const { error: sErr } = await supabase.from('drift_segments').insert(segmentRows)
-  if (sErr) throw new Error(`儲存語音段失敗：${sErr.message}`)
+  if (sErr) {
+    await supabase.from('drifts').delete().eq('id', drift.id)
+    throw new Error(`儲存語音段失敗：${sErr.message}`)
+  }
 
   // 4. 認領一則陌生人的回應
   const received = await claimStrangerDrift(wordId)
@@ -126,6 +133,7 @@ export async function getTodayStatus(wordId) {
       .maybeSingle(),
   ])
 
+  if (mine.error) throw new Error(`查詢回應狀態失敗：${mine.error.message}`)
   const responded = (mine.data?.length ?? 0) > 0
   let received = claimed.data ? await hydrateDrift(claimed.data) : null
   let justArrived = false

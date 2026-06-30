@@ -54,13 +54,15 @@ export default function ReceivedScreen({ status, word, received, error, rejected
               {error}
             </p>
             {rejected ? (
-              <button
-                onClick={onRewrite}
-                className="text-sm font-serif font-light text-ink tracking-wide underline underline-offset-4 decoration-ink/30 active:opacity-60 transition-opacity"
-                style={rise(0.35)}
-              >
-                換個說法
-              </button>
+              onRewrite && (
+                <button
+                  onClick={onRewrite}
+                  className="text-sm font-serif font-light text-ink tracking-wide underline underline-offset-4 decoration-ink/30 active:opacity-60 transition-opacity"
+                  style={rise(0.35)}
+                >
+                  換個說法
+                </button>
+              )
             ) : (
               onRetry && (
                 <button
