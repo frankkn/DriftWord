@@ -60,7 +60,23 @@ export async function submitVoiceDrift(wordId, segments) {
     })
   }
 
-  // 3. 寫入 segment 紀錄
+  // 3. 語音內容審查：Groq Whisper 轉文字 → OpenAI Moderation
+  // fail-open：審查系統出錯時放行，不因基礎設施問題擋住正常用戶
+  try {
+    const { data: modResult, error: modErr } = await supabase.functions.invoke('moderate-voice', {
+      body: { paths: segmentRows.map((s) => s.path) },
+    })
+    if (!modErr && modResult?.flagged) {
+      await supabase.from('drifts').delete().eq('id', drift.id)
+      await supabase.storage.from(BUCKET).remove(segmentRows.map((s) => s.path))
+      throw new Error('REJECTED')
+    }
+  } catch (e) {
+    if (e.message === 'REJECTED') throw e
+    console.warn('[DriftWord] voice moderation skipped:', e.message)
+  }
+
+  // 4. 寫入 segment 紀錄
   const { error: sErr } = await supabase.from('drift_segments').insert(segmentRows)
   if (sErr) {
     await supabase.from('drifts').delete().eq('id', drift.id)
