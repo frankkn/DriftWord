@@ -36,6 +36,7 @@ DriftWord 不是社群 app，是一種**儀式**。
 - 📨 **拆信式收件**：語音以波形播放、文字以手寫信紙呈現，不顯示對方任何個資
 - 📅 **每日換詞**：詞庫 + Postgres cron，台北時間每天 00:00 自動輪換
 - 🙈 **免註冊**：匿名身分，一天一次（資料庫層鎖定）
+- 🛡️ **內容審查**：文字經關鍵字黑名單 + OpenAI Moderation 雙重過濾；語音經 Groq Whisper 轉文字後同樣送審，API key 不暴露前端
 
 ---
 
@@ -47,6 +48,7 @@ DriftWord 不是社群 app，是一種**儀式**。
 | 後端 | Supabase（Auth 匿名登入 / Postgres / Storage） |
 | 語音 | 瀏覽器原生 MediaRecorder API |
 | 排程 | Supabase pg_cron（每日換詞） |
+| 內容審查 | OpenAI Moderation（文字）+ Groq Whisper（語音轉文字）|
 | 部署 | Vercel |
 
 ---
@@ -89,6 +91,24 @@ npm run dev
 
 另外，到 **Authentication → Sign In / Providers** 開啟 **Anonymous sign-ins**。
 
+### Edge Functions
+
+在 **Edge Functions → Secrets** 新增以下兩組 secret：
+
+| Secret | 說明 |
+|--------|------|
+| `OPENAI_API_KEY` | OpenAI API key，用於文字與語音的 Moderation |
+| `GROQ_API_KEY` | Groq API key，用於語音轉文字（Whisper Large v3 Turbo） |
+
+部署兩個 function：
+
+```bash
+npx supabase functions deploy moderate-text --project-ref <your-project-ref>
+npx supabase functions deploy moderate-voice --project-ref <your-project-ref>
+```
+
+或直接在 Supabase Dashboard → Edge Functions 手動建立並貼入 `supabase/functions/` 下對應的程式碼。
+
 ---
 
 ## 測試資料
@@ -126,6 +146,9 @@ src/
     messages.js            詩意錯誤文案
 supabase/
   schema.sql / words.sql / storage.sql
+  functions/
+    moderate-text/           文字內容審查（OpenAI Moderation）
+    moderate-voice/          語音轉文字 + 審查（Groq Whisper + OpenAI）
 scripts/
   seed-test-drifts.mjs     測試資料種子
 ```
