@@ -7,7 +7,7 @@ import SettingsScreen from './components/SettingsScreen'
 import TodayClosed from './components/TodayClosed'
 import { ensureSession } from './lib/session'
 import { getTodayWord } from './lib/words'
-import { submitVoiceDrift, submitTextDrift, getTodayStatus, claimStrangerDrift } from './lib/drift'
+import { submitVoiceDrift, submitTextDrift, getTodayStatus, claimStrangerDrift, countWordDrifts } from './lib/drift'
 import { toPoeticError } from './lib/messages'
 
 const FALLBACK_WORD = '消失'
@@ -26,6 +26,7 @@ export default function App() {
   const [responded, setResponded] = useState(false)
   const [todayReceived, setTodayReceived] = useState(null)
   const [justArrived, setJustArrived] = useState(false)
+  const [driftCount, setDriftCount] = useState(null) // 今天已有幾封信，null = 未知/隱藏
 
   // 送出 / 收件狀態
   const [sendStatus, setSendStatus] = useState('sending') // 'sending' | 'done'
@@ -43,6 +44,10 @@ export default function App() {
       setWord(w)
       setLoading(false)
       if (w?.id) {
+        // 計數獨立載入，失敗只是不顯示，不影響主流程
+        countWordDrifts(w.id).then((n) => {
+          if (alive) setDriftCount(n)
+        })
         try {
           const status = await getTodayStatus(w.id)
           if (!alive) return
@@ -95,6 +100,7 @@ export default function App() {
       setResponded(true)
       setTodayReceived(received)
       setJustArrived(false) // 當場交換得到的，不算「稍後漂到」
+      setDriftCount((c) => (c == null ? c : c + 1)) // 自己這封也算進去
     } catch (err) {
       console.error(err)
       if (err?.message === 'REJECTED') setRejected(true)
@@ -163,6 +169,14 @@ export default function App() {
         ) : (
           <p className="text-sm text-ink-muted font-serif font-light text-center leading-relaxed max-w-[18rem]">
             說出你的第一個記憶，或一個感受。
+          </p>
+        )}
+
+        {!loading && driftCount != null && (
+          <p className="mt-8 text-xs text-ink-muted/70 font-serif font-light tracking-wider">
+            {driftCount > 0
+              ? `今天已有 ${driftCount} 封信在漂流`
+              : '今天的海面還很安靜'}
           </p>
         )}
       </main>

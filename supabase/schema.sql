@@ -35,6 +35,11 @@ create index if not exists drifts_unclaimed_idx
 create unique index if not exists drifts_one_per_author_word
   on public.drifts(author_id, word_id);
 
+-- 一個人對同一個詞只能收到一封信（DB 層擋掉重複認領，
+-- 即使多分頁 race 或直接呼叫 RPC 也拿不到第二封）
+create unique index if not exists drifts_one_claim_per_user_word
+  on public.drifts(word_id, claimed_by) where claimed_by is not null;
+
 -- ── 語音分段（最多 3 段）─────────────────────────────────
 create table if not exists public.drift_segments (
   id          uuid primary key default gen_random_uuid(),
@@ -96,6 +101,22 @@ as $$
 declare
   result public.drifts;
 begin
+  -- 先寫過信才有資格認領（儀式：先付出才有交換）
+  if not exists (
+    select 1 from public.drifts
+     where word_id = p_word_id and author_id = auth.uid()
+  ) then
+    return null;
+  end if;
+
+  -- 已經收過一封就不再給（配合 drifts_one_claim_per_user_word 雙重保險）
+  if exists (
+    select 1 from public.drifts
+     where word_id = p_word_id and claimed_by = auth.uid()
+  ) then
+    return null;
+  end if;
+
   update public.drifts
      set claimed_by = auth.uid(),
          claimed_at = now()
@@ -121,3 +142,18 @@ end;
 $$;
 
 grant execute on function public.claim_drift(uuid) to authenticated;
+
+-- ── 統計：今日詞已收到幾封漂流信 ────────────────────────────
+-- RLS 讓一般使用者只能讀自己/認領到的 drift，所以用 security definer
+-- 只回傳「數字」，不洩漏任何內容。
+create or replace function public.count_word_drifts(p_word_id uuid)
+returns integer
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select count(*)::int from public.drifts where word_id = p_word_id;
+$$;
+
+grant execute on function public.count_word_drifts(uuid) to authenticated;

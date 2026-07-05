@@ -178,6 +178,18 @@ export async function getTodayStatus(wordId) {
   return { responded, received, justArrived }
 }
 
+// 今日詞已收到幾封漂流信（所有人的總數，只回傳數字）。
+// 失敗時回傳 null，前端據此隱藏計數，不影響主流程。
+export async function countWordDrifts(wordId) {
+  if (!wordId) return null
+  const { data, error } = await supabase.rpc('count_word_drifts', { p_word_id: wordId })
+  if (error) {
+    console.warn('[DriftWord] 讀取漂流信數失敗：', error.message)
+    return null
+  }
+  return typeof data === 'number' ? data : null
+}
+
 // 把一則 drift 補上可播放的內容（語音段 + signed URL）。
 export async function hydrateDrift(drift) {
   if (!drift) return null
