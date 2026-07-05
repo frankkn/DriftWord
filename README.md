@@ -33,11 +33,11 @@ DriftWord 不是社群 app，是一種**儀式**。
 <table align="center">
   <tr>
     <td align="center"><img src="docs/screenshots/main_page.png" width="380" alt="首頁：今天的詞" /></td>
-    <td align="center"><img src="docs/screenshots/voice_page.png" width="380" alt="語音錄製頁" /></td>
+    <td align="center"><img src="docs/screenshots/finish_page.png" width="380" alt="完成頁" /></td>
   </tr>
   <tr>
+    <td align="center"><img src="docs/screenshots/voice_page.png" width="380" alt="語音錄製頁" /></td>
     <td align="center"><img src="docs/screenshots/word_page.png" width="380" alt="文字書寫頁" /></td>
-    <td align="center"><img src="docs/screenshots/finish_page.png" width="380" alt="完成頁" /></td>
   </tr>
 </table>
 
