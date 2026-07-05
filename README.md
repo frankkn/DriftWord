@@ -28,6 +28,16 @@ DriftWord 不是社群 app，是一種**儀式**。
 
 ---
 
+## 畫面截圖
+
+<p align="center">
+  <img src="docs/main_page.png" width="280" alt="首頁：今天的詞" />
+  <img src="docs/voice_page.png" width="280" alt="語音錄製頁" />
+  <img src="docs/word_page.png" width="280" alt="文字書寫頁" />
+</p>
+
+---
+
 ## 功能
 
 - 🎙 **語音回應**：瀏覽器原生錄音，最多 3 段、每段 60 秒，逐段試聽與重錄
