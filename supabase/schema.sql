@@ -157,3 +157,21 @@ as $$
 $$;
 
 grant execute on function public.count_word_drifts(uuid) to authenticated;
+
+-- ── 檢查：池子裡是否有可認領的信（不是自己的、尚未被認領）────────
+create or replace function public.has_claimable_drift(p_word_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.drifts
+     where word_id = p_word_id
+       and author_id <> auth.uid()
+       and claimed_by is null
+  );
+$$;
+
+grant execute on function public.has_claimable_drift(uuid) to authenticated;

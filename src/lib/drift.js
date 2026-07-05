@@ -178,6 +178,18 @@ export async function getTodayStatus(wordId) {
   return { responded, received, justArrived }
 }
 
+// 池子裡是否有可立刻認領的信（不是自己的、尚未被認領）。
+// 失敗時回傳 false，不影響主流程。
+export async function hasClaimableDrift(wordId) {
+  if (!wordId) return false
+  const { data, error } = await supabase.rpc('has_claimable_drift', { p_word_id: wordId })
+  if (error) {
+    console.warn('[DriftWord] 讀取可認領狀態失敗：', error.message)
+    return false
+  }
+  return !!data
+}
+
 // 今日詞已收到幾封漂流信（所有人的總數，只回傳數字）。
 // 失敗時回傳 null，前端據此隱藏計數，不影響主流程。
 export async function countWordDrifts(wordId) {

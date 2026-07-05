@@ -150,11 +150,6 @@ export default function ReceivedScreen({ status, word, received, error, rejected
               你的話已經漂出去了。
               <br />
               <span className="text-ink-muted text-base">
-                你，也許是今天第一個
-                <br />
-                說出「{word}」的人。
-                <br />
-                <br />
                 這裡會靜靜等著——
                 <br />
                 有信漂來，會自動出現。

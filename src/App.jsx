@@ -7,7 +7,7 @@ import SettingsScreen from './components/SettingsScreen'
 import TodayClosed from './components/TodayClosed'
 import { ensureSession } from './lib/session'
 import { getTodayWord } from './lib/words'
-import { submitVoiceDrift, submitTextDrift, getTodayStatus, claimStrangerDrift, countWordDrifts } from './lib/drift'
+import { submitVoiceDrift, submitTextDrift, getTodayStatus, claimStrangerDrift, countWordDrifts, hasClaimableDrift } from './lib/drift'
 import { toPoeticError } from './lib/messages'
 
 const FALLBACK_WORD = '消失'
@@ -27,6 +27,7 @@ export default function App() {
   const [todayReceived, setTodayReceived] = useState(null)
   const [justArrived, setJustArrived] = useState(false)
   const [driftCount, setDriftCount] = useState(null) // 今天已有幾封信，null = 未知/隱藏
+  const [claimable, setClaimable] = useState(false)  // 池子裡現在是否有信可認領
 
   // 送出 / 收件狀態
   const [sendStatus, setSendStatus] = useState('sending') // 'sending' | 'done'
@@ -44,10 +45,9 @@ export default function App() {
       setWord(w)
       setLoading(false)
       if (w?.id) {
-        // 計數獨立載入，失敗只是不顯示，不影響主流程
-        countWordDrifts(w.id).then((n) => {
-          if (alive) setDriftCount(n)
-        })
+        // 計數與可認領狀態獨立載入，失敗只是不顯示，不影響主流程
+        countWordDrifts(w.id).then((n) => { if (alive) setDriftCount(n) })
+        hasClaimableDrift(w.id).then((v) => { if (alive) setClaimable(v) })
         try {
           const status = await getTodayStatus(w.id)
           if (!alive) return
@@ -101,6 +101,7 @@ export default function App() {
       setTodayReceived(received)
       setJustArrived(false) // 當場交換得到的，不算「稍後漂到」
       setDriftCount((c) => (c == null ? c : c + 1)) // 自己這封也算進去
+      setClaimable(false) // 送出並認領後，池子狀態重置
     } catch (err) {
       console.error(err)
       if (err?.message === 'REJECTED') setRejected(true)
@@ -173,11 +174,16 @@ export default function App() {
         )}
 
         {!loading && driftCount != null && (
-          <p className="mt-8 text-xs text-ink-muted/70 font-serif font-light tracking-wider">
-            {driftCount > 0
-              ? `今天已有 ${driftCount} 封信在漂流`
-              : '今天的海面還很安靜'}
-          </p>
+          <div className="mt-8 flex flex-col items-center gap-1.5">
+            <p className="text-xs text-ink-muted/70 font-serif font-light tracking-wider">
+              {driftCount > 0 ? `今天已有 ${driftCount} 封信在漂流` : '今天的海面還很安靜'}
+            </p>
+            {!responded && claimable && (
+              <p className="text-xs text-drift/70 font-serif font-light tracking-wider">
+                有一封信正在等人收
+              </p>
+            )}
+          </div>
         )}
       </main>
 
