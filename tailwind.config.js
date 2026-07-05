@@ -15,7 +15,7 @@ export default {
       },
       fontFamily: {
         serif: ['"Noto Serif TC"', '"Georgia"', 'serif'],
-        hand: ['"Ma Shan Zheng"', '"Noto Serif TC"', 'cursive'],
+        hand: ['"LXGW WenKai TC"', '"Noto Serif TC"', 'cursive'],
       },
     },
   },
