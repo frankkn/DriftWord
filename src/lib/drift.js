@@ -1,6 +1,5 @@
 import { supabase } from './supabase'
 import { ensureSession } from './session'
-import { findBlockedWord } from './blocklist'
 
 const BUCKET = 'drifts'
 
@@ -95,10 +94,7 @@ export async function submitTextDrift(wordId, text) {
   const content = (text ?? '').trim()
   if (!content) throw new Error('沒有可送出的文字。')
 
-  // 第一關：關鍵字黑名單（客戶端，即時）
-  if (findBlockedWord(content)) throw new Error('REJECTED')
-
-  // 第二關：OpenAI Moderation（伺服器端，API key 不暴露給前端）
+  // OpenAI Moderation（伺服器端，API key 不暴露給前端）
   // fail-open：Edge Function 出錯時放行，不因審查系統問題擋住正常用戶
   try {
     const { data: modResult, error: modErr } = await supabase.functions.invoke('moderate-text', {
