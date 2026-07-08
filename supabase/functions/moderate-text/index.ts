@@ -9,6 +9,10 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
+    if (Deno.env.get('MODERATION_ENABLED') !== 'true') {
+      return json({ flagged: false })
+    }
+
     const { text } = await req.json()
 
     if (!text || typeof text !== 'string') {

@@ -10,6 +10,10 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
+    if (Deno.env.get('MODERATION_ENABLED') !== 'true') {
+      return json({ flagged: false })
+    }
+
     const { paths } = await req.json()
     if (!paths?.length) return json({ flagged: false })
 
