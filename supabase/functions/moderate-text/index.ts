@@ -36,7 +36,16 @@ serve(async (req) => {
     }
 
     const data = await res.json()
-    const flagged: boolean = data.results?.[0]?.flagged ?? false
+    const cats = data.results?.[0]?.categories ?? {}
+    // Only block content that attacks others — self-expression about dark emotions
+    // (self-harm, violence in memories, etc.) is intentionally allowed on DriftWord.
+    const BLOCK_CATEGORIES = [
+      'harassment', 'harassment/threatening',
+      'hate', 'hate/threatening',
+      'illicit/violent',
+      'sexual/minors',
+    ]
+    const flagged: boolean = BLOCK_CATEGORIES.some((c) => cats[c] === true)
 
     return json({ flagged })
   } catch (e) {

@@ -72,7 +72,14 @@ serve(async (req) => {
     }
 
     const modData = await modRes.json()
-    const flagged: boolean = modData.results?.[0]?.flagged ?? false
+    const cats = modData.results?.[0]?.categories ?? {}
+    const BLOCK_CATEGORIES = [
+      'harassment', 'harassment/threatening',
+      'hate', 'hate/threatening',
+      'illicit/violent',
+      'sexual/minors',
+    ]
+    const flagged: boolean = BLOCK_CATEGORIES.some((c) => cats[c] === true)
 
     return json({ flagged })
   } catch (e) {
