@@ -1,179 +1,185 @@
+<div align="right">
+
+**English** | [繁體中文](README.zh-TW.md)
+
+</div>
+
 # DriftWord 漂流詞
 
-> 每天一個詞。說出你的第一個記憶，或一個感受。
-> 你的話會漂流給一個陌生人，你也會收到另一個陌生人的回應。
-> 沒有按讚，沒有追蹤，只有這一次交換。
+> One word a day. Speak your first memory of it, or how it makes you feel.
+> Your words drift to a stranger, and a stranger's response drifts back to you.
+> No likes, no following — just this one exchange.
 
 ---
 
-## ▶ 開始使用
+## ▶ Get Started
 
 ### 🌊 [https://drift-word.vercel.app](https://drift-word.vercel.app)
 
-打開網頁 → 看見今天的詞 → 用語音或文字說出你的感受 → 收到一封陌生人的信。
-不需要註冊，不需要帳號。
+Open the page → see today's word → respond by voice or text → receive a letter from a stranger.
+No sign-up, no account required.
 
 ---
 
-## 這是什麼
+## What Is This
 
-DriftWord 不是社群 app，是一種**儀式**。
+DriftWord is not a social app. It is a **ritual**.
 
-- **每天一個詞**（例如「消失」「等待」「遺囑」），由 300 字的詞庫每天 00:00 自動更換。
-- 你用**語音**（最多 3 段，每段 60 秒）或**文字**，說出對這個詞的第一個記憶或感受。
-- 送出後，你的回應**漂流給一個陌生人**；同時你會**收到另一個陌生人**對同一個詞的回應。
-- **一天只交換一次。** 沒有讚、沒有回覆、沒有追蹤——你們不會再相遇。
+- **One word per day** (e.g. "disappear", "waiting", "last will"), rotated automatically at 00:00 from a 300-word bank.
+- You respond with **voice** (up to 3 clips, 60 seconds each) or **text**, sharing your first memory of the word or how it makes you feel.
+- Once you send it, your response **drifts to a stranger** — and you **receive another stranger's** response to the same word.
+- **Only one exchange per day.** No likes, no replies, no following — you will never meet again.
 
-收到回應的那一刻，像是打開一封不知從哪裡來的信。
+The moment a response arrives, it feels like opening a letter from nowhere.
 
 ---
 
-## 畫面截圖
+## Screenshots
 
 <table align="center">
   <tr>
-    <td align="center"><img src="docs/screenshots/main_page.jpg" width="380" alt="首頁：今天的詞" /></td>
-    <td align="center"><img src="docs/screenshots/voice_page.jpg" width="380" alt="語音錄製頁" /></td>
+    <td align="center"><img src="docs/screenshots/main_page.jpg" width="380" alt="Home: today's word" /></td>
+    <td align="center"><img src="docs/screenshots/voice_page.jpg" width="380" alt="Voice recording screen" /></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/word_page.jpg" width="380" alt="文字書寫頁" /></td>
-    <td align="center"><img src="docs/screenshots/receive_page.jpg" width="380" alt="收信頁" /></td>
+    <td align="center"><img src="docs/screenshots/word_page.jpg" width="380" alt="Text writing screen" /></td>
+    <td align="center"><img src="docs/screenshots/receive_page.jpg" width="380" alt="Letter receiving screen" /></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/read_page.jpg" width="380" alt="閱讀信件頁" /></td>
-    <td align="center"><img src="docs/screenshots/setting.jpg" width="380" alt="設定頁" /></td>
+    <td align="center"><img src="docs/screenshots/read_page.jpg" width="380" alt="Letter reading screen" /></td>
+    <td align="center"><img src="docs/screenshots/setting.jpg" width="380" alt="Settings screen" /></td>
   </tr>
 </table>
 
 ---
 
-## 功能
+## Features
 
-- 🎙 **語音回應**：瀏覽器原生錄音，最多 3 段、每段 60 秒，逐段試聽與重錄
-- ✍️ **文字回應**：手寫感的書寫頁面
-- 🔁 **漂流配對**：送出即與一位陌生人交換；若當下無人可配，頁面會靜靜等著，有信漂入時自動浮現，不需重整
-- 📨 **拆信式收件**：語音以波形播放、文字以手寫信紙呈現，不顯示對方任何個資
-- 📅 **每日換詞**：詞庫 + Postgres cron，台北時間每天 00:00 自動輪換
-- 🙈 **免註冊**：匿名身分，一天一次（資料庫層鎖定）
-- 🛡️ **內容審查**：文字經關鍵字黑名單 + OpenAI Moderation 雙重過濾；語音經 Groq Whisper 轉文字後同樣送審，API key 不暴露前端
+- 🎙 **Voice responses**: native in-browser recording, up to 3 clips of 60 seconds each, with per-clip playback and re-recording
+- ✍️ **Text responses**: a writing page with a handwritten feel
+- 🔁 **Drift matching**: sending your response instantly pairs you with a stranger; if no one is available yet, the page quietly waits and a letter surfaces automatically when one drifts in — no refresh needed
+- 📨 **Letter-opening experience**: voice plays back as a waveform, text is rendered on handwritten letter paper, and no personal information about the other person is ever shown
+- 📅 **Daily word rotation**: word bank + Postgres cron, rotating automatically at 00:00 Taipei time every day
+- 🙈 **No registration**: anonymous identity, one exchange per day (enforced at the database level)
+- 🛡️ **Content moderation**: text passes through a keyword blocklist plus OpenAI Moderation; voice is transcribed by Groq Whisper and moderated the same way, with API keys never exposed to the frontend
 
 ---
 
-## 技術棧
+## Tech Stack
 
-| 層 | 技術 |
+| Layer | Technology |
 |----|------|
-| 前端 | React + Vite + Tailwind CSS |
-| 後端 | Supabase（Auth 匿名登入 / Postgres / Storage） |
-| 語音 | 瀏覽器原生 MediaRecorder API |
-| 排程 | Supabase pg_cron（每日換詞） |
-| 內容審查 | OpenAI Moderation（文字）+ Groq Whisper（語音轉文字）|
-| 部署 | Vercel |
+| Frontend | React + Vite + Tailwind CSS |
+| Backend | Supabase (anonymous Auth / Postgres / Storage) |
+| Voice | Native browser MediaRecorder API |
+| Scheduling | Supabase pg_cron (daily word rotation) |
+| Content moderation | OpenAI Moderation (text) + Groq Whisper (speech-to-text) |
+| Deployment | Vercel |
 
 ---
 
-## 本地開發
+## Local Development
 
 ```bash
-# 1. 取得程式碼
+# 1. Get the code
 git clone https://github.com/frankkn/DriftWord.git
 cd DriftWord
 
-# 2. 安裝依賴
+# 2. Install dependencies
 npm install
 
-# 3. 設定環境變數
+# 3. Configure environment variables
 cp .env.example .env.local
-# 編輯 .env.local，填入你的 Supabase 專案 URL 與 publishable key
+# Edit .env.local and fill in your Supabase project URL and publishable key
 
-# 4. 啟動
+# 4. Start
 npm run dev
-# 開啟 http://localhost:5173
+# Open http://localhost:5173
 ```
 
-### 環境變數
+### Environment Variables
 
-| 變數 | 說明 |
+| Variable | Description |
 |------|------|
-| `VITE_SUPABASE_URL` | Supabase 專案 URL（如 `https://xxxx.supabase.co`） |
-| `VITE_SUPABASE_KEY` | Supabase publishable key（可公開放前端） |
+| `VITE_SUPABASE_URL` | Supabase project URL (e.g. `https://xxxx.supabase.co`) |
+| `VITE_SUPABASE_KEY` | Supabase publishable key (safe to expose in the frontend) |
 
 ---
 
-## Supabase 設定
+## Supabase Setup
 
-在 Supabase 後台依序執行 `supabase/` 下的 SQL：
+Run the SQL files under `supabase/` in the Supabase dashboard, in order:
 
-1. **`schema.sql`** — 建立 `word_bank` / `drifts` / `drift_segments` 三表、RLS 權限、配對 RPC、唯一約束
-2. **`words.sql`** — 種入 300 個詞、每日換詞函式、pg_cron 排程
-3. **`storage.sql`** — 建立私有 `drifts` bucket 與上傳/讀取政策
+1. **`schema.sql`** — creates the `word_bank` / `drifts` / `drift_segments` tables, RLS policies, the matching RPC, and unique constraints
+2. **`words.sql`** — seeds the 300 words, the daily rotation function, and the pg_cron schedule
+3. **`storage.sql`** — creates the private `drifts` bucket with its upload/read policies
 
-另外，到 **Authentication → Sign In / Providers** 開啟 **Anonymous sign-ins**。
+Also, go to **Authentication → Sign In / Providers** and enable **Anonymous sign-ins**.
 
 ### Edge Functions
 
-在 **Edge Functions → Secrets** 新增以下兩組 secret：
+Under **Edge Functions → Secrets**, add these two secrets:
 
-| Secret | 說明 |
+| Secret | Description |
 |--------|------|
-| `OPENAI_API_KEY` | OpenAI API key，用於文字與語音的 Moderation |
-| `GROQ_API_KEY` | Groq API key，用於語音轉文字（Whisper Large v3 Turbo） |
+| `OPENAI_API_KEY` | OpenAI API key, used for moderating both text and voice |
+| `GROQ_API_KEY` | Groq API key, used for speech-to-text (Whisper Large v3 Turbo) |
 
-部署兩個 function：
+Deploy the two functions:
 
 ```bash
 npx supabase functions deploy moderate-text --project-ref <your-project-ref>
 npx supabase functions deploy moderate-voice --project-ref <your-project-ref>
 ```
 
-或直接在 Supabase Dashboard → Edge Functions 手動建立並貼入 `supabase/functions/` 下對應的程式碼。
+Alternatively, create them manually in the Supabase Dashboard → Edge Functions and paste in the corresponding code from `supabase/functions/`.
 
 ---
 
-## 測試資料
+## Test Data
 
-本地測試「收到陌生人回應」時，資料庫需要有別人留下的、未認領的回應：
+To test "receiving a stranger's response" locally, the database needs unclaimed responses left by others:
 
 ```bash
-node scripts/seed-test-drifts.mjs           # 種 5 則文字 + 1 則語音
-node scripts/seed-test-drifts.mjs 8         # 自訂數量
-node scripts/seed-test-drifts.mjs --verify  # 種完後認領一則確認循環可通
+node scripts/seed-test-drifts.mjs           # seed 5 text + 1 voice responses
+node scripts/seed-test-drifts.mjs 8         # custom count
+node scripts/seed-test-drifts.mjs --verify  # claim one after seeding to verify the full loop
 ```
 
 ---
 
-## 專案結構
+## Project Structure
 
 ```
 src/
-  App.jsx                  首頁與狀態流轉
+  App.jsx                  Home page and state flow
   components/
-    RecordingScreen.jsx    錄音頁
-    TextScreen.jsx         文字書寫頁
-    ReceivedScreen.jsx     拆信式收件頁
-    LetterAudio.jsx        波形語音播放器
-    TodayClosed.jsx        今天已回應的首頁狀態
-    SettingsScreen.jsx     設定頁
-    ConfirmDrift.jsx       送出前的確認層
+    RecordingScreen.jsx    Voice recording screen
+    TextScreen.jsx         Text writing screen
+    ReceivedScreen.jsx     Letter-opening receiving screen
+    LetterAudio.jsx        Waveform audio player
+    TodayClosed.jsx        Home state after today's exchange
+    SettingsScreen.jsx     Settings screen
+    ConfirmDrift.jsx       Confirmation layer before sending
   hooks/
-    useRecorder.js         MediaRecorder 錄音邏輯
+    useRecorder.js         MediaRecorder recording logic
   lib/
     supabase.js            Supabase client
-    session.js             匿名身分
-    words.js               今日詞
-    drift.js               送出、配對、收件、等待時自動輪詢
-    messages.js            詩意錯誤文案
+    session.js             Anonymous identity
+    words.js               Today's word
+    drift.js               Sending, matching, receiving, auto-polling while waiting
+    messages.js            Poetic error copy
 supabase/
   schema.sql / words.sql / storage.sql
   functions/
-    moderate-text/           文字內容審查（OpenAI Moderation）
-    moderate-voice/          語音轉文字 + 審查（Groq Whisper + OpenAI）
+    moderate-text/           Text moderation (OpenAI Moderation)
+    moderate-voice/          Speech-to-text + moderation (Groq Whisper + OpenAI)
 scripts/
-  seed-test-drifts.mjs     測試資料種子
+  seed-test-drifts.mjs     Test data seeder
 ```
 
 ---
 
-## 設計
+## Design
 
-接近紙張的米白底、墨水感深色文字、收斂的暗藍紫主題色。中文內文採 Noto Serif TC，手寫信件用 Ma Shan Zheng。極簡、沉浸、帶點詩意——讓每一次交換像翻開同一頁日記。
+A paper-like off-white background, ink-dark text, and a restrained dark blue-violet accent. Chinese body text is set in Noto Serif TC, with handwritten letters in Ma Shan Zheng. Minimal, immersive, and a little poetic — so every exchange feels like opening the same page of a shared diary.
